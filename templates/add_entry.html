@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Add entry{% endblock %}
+{% block content %}
+    <h1>Add new entry</h1>
+    {% if tday %}
+    <form method="POST">
+        <div class="form-group">
+            <label for="weight">Weight (kg)</label>
+            <input type="number" step="0.1" id="weight" name="weight" inputmode="decimal" required>
+        </div>
+        <div class="form-group">
+          <details>
+            <summary>Add waist measurement</summary>
+              <label for="waist">Waist (cm)</label>
+              <input type="number" step="0.1" id="waist" name="waist" inputmode="decimal">
+          </details>
+        </div>
+        <div class="form-group">
+          <details>
+            <summary>Add photos</summary>
+              <input type="file" id="photos" name="photos" multiple>
+          </details>
+        </div>
+        <div class="form-group">
+          <details>
+            <summary>Add notes</summary>
+              <label for="notes">Whats on your mind?</label>
+              <input type="text" id="notes" name="notes">
+          </details>
+        </div>
+        <div class="form-group">
+            <label for="the_date">Date</label>
+            <input type="date" id="the_date" name="the_date" value={{ tday }}>
+        </div>
+        <button type="submit" class="btn btn-block">Save</button>
+    </form>
+    {% endif %}
+{% endblock %}

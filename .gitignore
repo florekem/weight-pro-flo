@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+weight.db
+data/
+docker-compose.yml

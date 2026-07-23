@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Trend{% endblock %}
+{% block content %}
+    <h1>Your Trend</h1>
+    <canvas id="weightChart"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ labels | tojson }},
+          datasets: [{
+            label: '7-day moving average (kg)',
+            data: {{ values | tojson }},
+            borderColor: '#5b8def',
+            tension: 0.3,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { title: { display: true, text: 'Weight (kg)' } }
+          }
+        }
+      });
+    </script>
+{% endblock %}

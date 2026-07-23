@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Averages{% endblock %}
+{% block content %}
+    <h1>Weekly averages</h1>
+
+    {% if averages %}
+    <ul class="entry-list">
+        {% for stop, start, avg, change in averages %}
+        <li class="entry-card">
+            <div class="entry-info">
+              <span class="entry-weight">{{ avg }} kg ({{ change}} kg)</span>
+                <span class="entry-date">{{ stop }}</span>
+                <span class="entry-date">{{ start }}</span>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">No averages yet.</p>
+    {% endif %}
+{% endblock %}
