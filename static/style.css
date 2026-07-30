@@ -30,6 +30,14 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.navbar::-webkit-scrollbar {
+    display: none;
 }
 
 .navbar a {
@@ -38,6 +46,8 @@ body {
     font-weight: 600;
     padding: 0.4rem 0.6rem;
     border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .navbar a:hover,
@@ -133,6 +143,19 @@ h1 {
 .entry-remove-form button:hover {
     background: var(--danger);
     color: #fff;
+}
+
+.chart-wrapper {
+    width: 80vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 0;
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: auto !important;
 }
 
 .empty-state {

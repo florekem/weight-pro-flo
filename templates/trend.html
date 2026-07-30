@@ -2,7 +2,9 @@
 {% block title %}Trend{% endblock %}
 {% block content %}
     <h1>Your Trend</h1>
-    <canvas id="weightChart"></canvas>
+    <div class="chart-wrapper">
+        <canvas id="weightChart"></canvas>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       const ctx = document.getElementById('weightChart').getContext('2d');
@@ -16,14 +18,27 @@
             borderColor: '#5b8def',
             tension: 0.3,
             fill: false
-          }]
+          },
+            {
+              type: 'line',
+              label: 'Weight goal (kg)',
+              data: {{ weight_goal | tojson }},
+              borderColor: 'rgb(255, 99, 132)',
+              bobderDash: [10, 10]
+            }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: true,
           scales: {
-            x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Weight (kg)' } }
+            x: {
+              title: { display: true, text: 'Date', font: { size: 16 } },
+              ticks: { font: { size: 14 } }
+            },
+            y: {
+              title: { display: true, text: 'Weight (kg)', font: { size: 16 } },
+              ticks: { font: { size: 14 } }
+            }
           }
         }
       });

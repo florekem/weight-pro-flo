@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+    <h1>Settings</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label for="weight goal">Weight goal (kg):</label>
+            <input type="number" step="1" id="weight_goal" name="weight_goal" inputmode="decimal" value= {{ settings[1] }}>
+        </div>
+        <div class="form-group">
+            <label for="waist_reminder_days">Measure waist every (days):</label>
+            (How often you want to be notified about waist measurement)
+            <input type="number" step="1" id="waist_reminder_days" name="waist_reminder_days" inputmode="decimal" value= {{ settings[2] }}>
+
+        </div>
+        <button type="submit" class="btn btn-block">Save</button>
+    </form>
+{% endblock %}

@@ -22,7 +22,7 @@ if not app.secret_key:
     raise RuntimeError("SECRET_KEY environment variable is required")
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = "login"  # type: ignore
 
 
 class User(UserMixin):
@@ -45,6 +45,29 @@ def load_user(user_id):
         return None
 
     return User(id=row[0], username=row[1], password_hash=row[2])
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    con, cur = open_db()
+    if request.method == "POST":
+        weight_goal = request.form["weight_goal"]
+        waist_reminder_days = request.form["waist_reminder_days"]
+        settings = cur.execute(
+            """
+        UPDATE users SET weight_goal = ?, waist_reminder_days = ? WHERE id = ?
+        """,
+            (weight_goal, waist_reminder_days, current_user.id),
+        )
+        con.commit()
+
+    settings = cur.execute(
+        "SELECT id, weight_goal, waist_reminder_days FROM users WHERE id = ?",
+        (current_user.id,),
+    ).fetchone()
+
+    con.close()
+    return render_template("settings.html", settings=settings)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -76,24 +99,22 @@ def logout():
     return redirect(url_for("home"))
 
 
-# this one will be for login screen
 @app.route("/")
 def home():
     return render_template("home.html")
 
 
-# this one will be for displaying all entries from the database for logged-in user
-# if user is allready logged-in redirect here from home
-# todo: make entries template. how to?
+# displaying all entries from the database for logged-in user
+# the default redirect page after logg in
 @app.route("/entries")
 @login_required
 def entries():
     today = date.today()
-    back_in_time = today - timedelta(days=21)
+    back_in_time = today - timedelta(days=21)  # how many days to show on page
     con, cur = open_db()
     rows = cur.execute(
         """
-        SELECT id, date, weight, waist FROM entries 
+        SELECT id, date, weight, waist, notes, photo_path FROM entries 
         WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC
         """,
         (current_user.id, back_in_time, today),
@@ -108,13 +129,13 @@ def entries():
     waist_reminder = False
     if last_waist_date:
         if datetime.now() - datetime.fromisoformat(last_waist_date) >= timedelta(
-            days=14
+            days=get_user_setting("waist_reminder_days", current_user.id)  # type: ignore
         ):
             waist_reminder = True
     return render_template("entries.html", entries=rows, waist_reminder=waist_reminder)
 
 
-# this one will be for adding new entries for logged-in user
+# add new entries for logged-in user
 @app.route("/entries/add", methods=["POST", "GET"])
 @login_required
 def add_entry():
@@ -123,12 +144,13 @@ def add_entry():
         the_date = request.form["the_date"]
         weight = request.form["weight"]
         waist = request.form["waist"]
+        notes = request.form["notes"]
         cur.execute(
             """
-            INSERT INTO entries (user_id, date, weight, waist)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO entries (user_id, date, weight, waist, notes)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (current_user.id, the_date, weight, waist),
+            (current_user.id, the_date, weight, waist, notes),
         )
         con.commit()
         con.close()
@@ -180,21 +202,21 @@ def averages():
                 [
                     chunk_stop.strftime("%Y-%m-%d"),
                     chunk_start.strftime("%Y-%m-%d"),
-                    (sum(temp_avg) / len(temp_avg)),
+                    round((sum(temp_avg) / len(temp_avg)), 2),
                 ]
             )
             i += 7
         except:
-            print("error, no more  entries")
+            print("requested entries listed")
             break
 
-    # this one is for adding change between weeks
+    #  display a weight change between consecutive weeks
     for i in range(0, len(avgs) - 1):
         diff = avgs[i][2] - avgs[i + 1][2]
         if diff > 0:  # add + or - sing for change
-            avgs[i].append("+" + str("{:.2f}".format(diff)))
+            avgs[i].append("+" + str(round(diff, 2)))
         else:
-            avgs[i].append(str("{:.2f}".format(diff)))
+            avgs[i].append(str(round(diff, 2)))
     # add 0 change to first week of tracking which does not compare
     avgs[len(avgs) - 1].append(0)
 
@@ -209,6 +231,9 @@ def trend():
     rows = cur.execute(
         "SELECT id, date, weight FROM entries WHERE user_id = ?", (current_user.id,)
     ).fetchall()
+    weight_goal = cur.execute(
+        "SELECT id, weight_goal FROM users WHERE id = ?", (current_user.id,)
+    ).fetchone()
     con.close()
 
     diki = {}
@@ -232,13 +257,33 @@ def trend():
         except:
             print("error, no more  entries")
             break
+
+    weight_goal = weight_goal[1]
+    weight_goal = [weight_goal] * len(labels)
     # reverse to get the oldest first
-    return render_template("trend.html", labels=labels[::-1], values=values[::-1])
+    return render_template(
+        "trend.html", labels=labels[::-1], values=values[::-1], weight_goal=weight_goal
+    )
 
 
+# helper for opening database
 def open_db():
     db_path = os.environ.get("DATABASE_PATH", "weight.db")
     con = sqlite3.connect(db_path)
     cur = con.cursor()
     cur.execute("PRAGMA foreign_keys = ON")
     return con, cur
+
+
+# helper for retrieving user requested setting (request col name)
+def get_user_setting(requested_setting, user_id):
+    con, cur = open_db()
+    settings = cur.execute(
+        "SELECT weight_goal, waist_reminder_days FROM users WHERE id = ?",
+        (user_id,),
+    ).fetchone()
+    con.close()
+    if requested_setting == "weight_goal":
+        return settings[0]
+    if requested_setting == "waist_reminder_days":
+        return settings[1]

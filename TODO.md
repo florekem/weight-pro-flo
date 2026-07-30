@@ -1,0 +1,26 @@
+- [x] round averages numbers
+- [x] add settings route and design the looks of html
+- [x] modify users db to be ready for storing per-user settings
+- [x] change app code in places where the settings will be applied (for example waist notification)
+- [] think about some kind of burger menu or something to fix too wide nav bar on mobile 
+- [] ! remove weight_goal from entries and put it in users db in existing .db (for newly created dbs it is corrected in db_init.py)
+- [] at home page add how many kg are left for a set goal weight
+- [] add notes page, which will display all notes from all entries in one place
+- [] add edit option to the entries page
+- [] add initial weight to settings and display on home page with statistics: you already lost xxx kg, xx to go (to goal)
+- [] 
+- [] 
+- [] 
+- [] alter table users add column waist_reminder_days integer default 1;
+- [] UPDATE users SET waist_reminder_days = 14 WHERE waist_reminder_days IS NULL;
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+
+

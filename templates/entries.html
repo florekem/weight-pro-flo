@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Your entries</h1>
       {% if waist_reminder %}
-        <a class="btn btn-danger" href="{{ url_for('add_entry') }}">Your last waist measurement is older than 2 weeks!</a>
+        <a class="btn btn-danger" href="{{ url_for('add_entry') }}">Plase take a waist measurement today!</a>
       {% endif %}
     <a class="btn btn-block" href="{{ url_for('add_entry') }}">Add new entry</a>
     {% if entries %}
@@ -15,7 +15,10 @@
               {% if entry[3] %}
               <span class="entry-waist">{{ entry[3] }} cm</span>
               {% endif %}
-                <span class="entry-date">{{ entry[1] }}</span>
+              {% if entry[4] %}
+              <span class="entry-notes">{{ entry[4] }}</span>
+              {% endif %}
+              <span class="entry-date">{{ entry[1] }}</span>
             </div>
             <form class="entry-remove-form" method="POST" action="{{ url_for('remove_entry', entry_id=entry[0]) }}">
                 <button type="submit">Remove</button>
