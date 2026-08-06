@@ -120,15 +120,15 @@ def entries():
         (current_user.id, back_in_time, today),
     ).fetchall()
     waist_last_date = cur.execute(
-        "SELECT MAX(date) FROM entries WHERE user_id = ? AND waist IS NOT NULL",
+        "SELECT MAX(date) FROM entries WHERE user_id = ? AND NULLIF(waist, '') IS NOT NULL",
         (current_user.id,),
     ).fetchall()
     con.close()
     # check when was the last date waist was measured
-    last_waist_date = waist_last_date[0][0]
+    waist_last_date = waist_last_date[0][0]
     waist_reminder = False
-    if last_waist_date:
-        if datetime.now() - datetime.fromisoformat(last_waist_date) >= timedelta(
+    if waist_last_date:
+        if datetime.now() - datetime.fromisoformat(waist_last_date) >= timedelta(
             days=get_user_setting("waist_reminder_days", current_user.id)  # type: ignore
         ):
             waist_reminder = True
